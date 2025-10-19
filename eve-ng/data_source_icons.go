@@ -15,14 +15,7 @@ func dataSourceEveIcons() *schema.Resource {
 			"icons": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name":        {Type: schema.TypeString, Computed: true},
-						"filename":    {Type: schema.TypeString, Computed: true},
-						"description": {Type: schema.TypeString, Computed: true},
-						"category":    {Type: schema.TypeString, Computed: true},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -31,48 +24,30 @@ func dataSourceEveIcons() *schema.Resource {
 func dataSourceEveIconsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 
-	resp, err := c.Get("api/list/icons")
+	resp, err := c.Get("api/list/networks")
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	var result struct {
-		Code    int                    `json:"code"`
-		Status  string                 `json:"status"`
-		Message string                 `json:"message"`
-		Data    map[string]interface{} `json:"data"`
+		Code    int               `json:"code"`
+		Status  string            `json:"status"`
+		Message string            `json:"message"`
+		Icons   map[string]string `json:"icons"`
 	}
 
 	if err := c.HandleResponse(resp, &result); err != nil {
 		return diag.FromErr(err)
 	}
 
-	icons := make([]map[string]interface{}, 0, len(result.Data))
-	for name, iconData := range result.Data {
-		iconMap, ok := iconData.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		icon := map[string]interface{}{
-			"name": name,
-		}
-
-		if filename, ok := iconMap["filename"].(string); ok {
-			icon["filename"] = filename
-		}
-		if desc, ok := iconMap["description"].(string); ok {
-			icon["description"] = desc
-		}
-		if cat, ok := iconMap["category"].(string); ok {
-			icon["category"] = cat
-		}
-
-		icons = append(icons, icon)
+	// アイコン名のリストを返す（シンプルな文字列配列）
+	iconNames := make([]string, 0, len(result.Icons))
+	for iconName := range result.Icons {
+		iconNames = append(iconNames, iconName)
 	}
 
 	d.SetId("icons")
-	if err := d.Set("icons", icons); err != nil {
+	if err := d.Set("icons", iconNames); err != nil {
 		return diag.FromErr(err)
 	}
 

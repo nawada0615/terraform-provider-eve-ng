@@ -15,6 +15,7 @@ func main() {
 
 	opts := &plugin.ServeOpts{
 		ProviderFunc: eveng.Provider,
+		ProviderAddr: "local/nawada0615/eve-ng",
 	}
 
 	if debugMode {

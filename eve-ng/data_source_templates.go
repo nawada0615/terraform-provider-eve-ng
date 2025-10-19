@@ -37,7 +37,7 @@ func dataSourceEveTemplates() *schema.Resource {
 func dataSourceEveTemplatesRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 
-	resp, err := c.Get("api/list/templates")
+	resp, err := c.Get("api/list/templates/")
 	if err != nil {
 		return diag.FromErr(err)
 	}
