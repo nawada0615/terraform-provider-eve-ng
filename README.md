@@ -9,7 +9,7 @@ This provider supports the following EVE-NG resources with robust error handling
 ### Resources
 - **eve_folder** - Manage EVE-NG folders
 - **eve_lab** - Manage EVE-NG labs
-- **eve_network** - Manage lab networks
+- **eve_network** - Manage lab networks (supports visibility control)
 - **eve_node** - Manage lab nodes (QEMU, Dynamips, IOL, Docker, VPCS)
 - **eve_interface_attachment** - Manage node interface connections
 
@@ -32,6 +32,11 @@ This provider supports the following EVE-NG resources with robust error handling
 - **State Management**: Correct handling of resource not found scenarios
 - **Authentication**: Enhanced login error handling with detailed messages
 - **Network Management**: Resilient network operations with fallback support
+
+### 🎨 Network Visibility Control
+- **Hidden Networks**: Set `visibility = "0"` to hide networks from EVE-NG GUI
+- **Clean Lab Interface**: Create connection-only networks without visual clutter
+- **Professional Appearance**: Maintain clean lab diagrams for presentations
 
 ## Installation
 
@@ -127,7 +132,7 @@ resource "eve_network" "connection_net" {
   lab_file   = eve_lab.test_lab.file
   name       = "connection-net"
   type       = "bridge"
-  visibility = "0"  # Hidden network
+  visibility = "0"  # Hidden network (not visible in EVE-NG GUI)
 }
 
 # Connect both nodes to the same network for direct communication
