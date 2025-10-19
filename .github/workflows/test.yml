@@ -1,0 +1,54 @@
+name: Test and Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        cache: true
+    
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: '1.6.0'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Install dependencies
+      run: go mod download
+    
+    - name: Run unit tests
+      run: go test -v ./tests -run "TestProvider|TestProvider_impl|TestProviderSchema"
+    
+    - name: Run acceptance tests
+      run: TF_ACC=1 go test -v ./tests -timeout 5m
+      env:
+        TF_ACC: 1
+    
+    - name: Build provider
+      run: go build -o terraform-provider-eve-ng
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-provider-eve-ng
+        path: terraform-provider-eve-ng
